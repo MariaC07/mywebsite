@@ -34,7 +34,12 @@ app.get('/read', function(req, res) {
 
 app.post('/formHandler', function(req, res) {
   fileActions.writeData(nameFileLocation, req.body.firstName, function() {
-    res.send('Hello ' + req.body.firstName + ', your name has been stored.')
+    res.send(
+      'Hello ' +
+        req.body.firstName +
+        req.body.lastName +
+        ', your name has been stored.'
+    )
   })
 })
 
