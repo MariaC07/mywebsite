@@ -17,7 +17,15 @@ function writeData(savePath, text, callback) {
   })
 }
 
+function deleteData(deletePath, text, callback) {
+  fs.deleteFile(deletePath, text, function(err, fileContent) {
+    if (err) throw err
+    callback(fileContent)
+  })
+}
+
 module.exports = {
   readData: readData,
-  writeData: writeData
+  writeData: writeData,
+  deleteData: deleteData
 }

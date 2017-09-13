@@ -43,6 +43,10 @@ app.post('/formHandler', function(req, res) {
   })
 })
 
+app.delete('/deleteForm', function(req, res) {
+  console.log('Got a delete request for / formHandler')
+  res.send('Hello Detele')
+})
 app.use(express.static('public'))
 
 app.listen(3000, function() {
