@@ -2,17 +2,32 @@
 <html>
 <head>
   <title>My website</title>
+  <link rel='stylesheet' type='text/css' href='style.css'/>
 </head>
   <body>
-    <h1>This is a form</h1>
-      <a href= "/">go back to index</a>
-    <form name="testForm" action='/createUser' method="post">
+    <h1>Please fill in the form:</h1>
+  <form name="testForm" action='/' method="post">
       First name:<br>
-      <input type="text" name="firstName" required><br><br>
+      <input type="text" name="firstName" required ><br><br>
       Last name:<br>
-      <input type="text" name="lastName" required><br>
+      <input type="text" name="lastName" required ><br>
       <br>
-      <input type="submit" value="Submit">
+      <button id='mybutton' type="submit" value="submit">Submit</button>
     </form>
-  </body>
+    <p id="mydate">Today is:</p>
+<script>
+var dateString = "Today's date is: "
+var newDate = new Date()
+
+// Get the day, month, and year.
+dateString += newDate.getDate() + '/'
+dateString += newDate.getMonth() + 1 + '/'
+dateString += newDate.getFullYear()
+
+document.write(dateString)
+// var myDate = new Date()
+// document.getElementById('mydate').innerHTML = myDate
+// console.log(new Date())
+</script>
+</body>
 </html>
