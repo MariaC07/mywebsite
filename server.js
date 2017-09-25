@@ -2,7 +2,6 @@ var express = require('express')
 var path = require('path')
 var app = express()
 var fs = require('fs')
-//Static caching of templates
 var ejs = require('ejs')
 
 var bodyParser = require('body-parser')
@@ -11,7 +10,7 @@ var bodyParser = require('body-parser')
 app.set('port', 3000)
 
 // .txt file location
-var txfilepath = './public/test.txt'
+var txfilepath = './Public/test.txt'
 
 app.use(express.static(path.join(__dirname, 'public')))
 
@@ -143,7 +142,7 @@ function readLines(input, func) {
     //is gonna find the last index of the new line
     var index = remaining.indexOf('\n')
 
-    //is a error of the line of the text file
+    //is an error of the line of the text file
     var reocordarray = []
     //is counter number dispalying the lines
     var lineNumber = 1
@@ -180,7 +179,7 @@ function func(data) {
 
 function createTable(data) {
   var tbl =
-    '<a href="/"><button>Create User</button></a><br/><table><tbody><tr><th>Firstname </th><th>Lastname</th><th>Action</th><tr>'
+    '<a href="/"><button>Create User</button></a><br/><table><tbody><tr><th><u>Firstname</u></th><th><u>Lastname</u></th><th><u>Action</u></th><th><u>Update</u></th><th><u>Delete</u></th><tr>'
   console.log(data[0].Firstname)
 
   for (var i = 0; i < data.length; i++) {
