@@ -4,11 +4,12 @@
   <title>My website</title>
 </head>
   <body>
-    <h1>This is an Update form </h1>
+    <h1> This is an Update form </h1>
 
-  <form name="testForm" action='/Updateuser' method="post">
+   <form name="testForm" action='/Updateuser' method="post">
       <!-- Line Number : -->
-   <input type="hidden" name="linenumber" required value='<%= ID %>'>
+      <!-- '<%= ID %>' - Outputs the value into the template (HTML escaped) -->
+      <input type="hidden" name="linenumber" required value='<%= ID %>'>
       First name:<br>
       <input type="text" name="firstName" required ><br><br>
       Last name:<br>
@@ -16,5 +17,6 @@
       <br>
       <input type="submit" value="Submit">
     </form>
+  
   </body>
 </html>

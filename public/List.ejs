@@ -1,0 +1,27 @@
+<html>
+<head>
+</head>
+<body>
+  <a href="/"><button>Create User</button></a><br>
+  <table>
+    <tbody>
+      <tr>
+        <th><u>Firstname</u></th>
+        <th><u>Lastname</u></th>
+        <th><u>Action</u></th>
+        <th><u>Update</u></th>
+        <th><u>Delete</u></th>
+     </tr>
+      <% for (var i = 0; i < data.length; i++) {%>
+        <tr>
+          <td><%= data[i].firstName %></td>
+          <td><%= data[i].lastName %></td>
+          <td><%= data[i].lineNumber %></td>
+          <td><a href='/Updateuser?id=<%= data[i].lineNumber %>'>Update</a></td>
+          <td><a href='/RemoveUser?id=<%= data[i].lineNumber %>'>Delete</a></td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+</body>
+</html>

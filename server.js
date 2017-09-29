@@ -2,41 +2,32 @@ var express = require('express')
 var path = require('path')
 var app = express()
 var fs = require('fs')
-var ejs = require('ejs')
-
+// var readline = require('readline')
 var bodyParser = require('body-parser')
+
+// .txt file location
+var txfilepath = './public/test.txt'
+
+app.use(bodyParser.json()) // to support JSON-encoded bodies
+app.use(bodyParser.urlencoded({ extended: false }))
 
 // Define the port to run on
 app.set('port', 3000)
 
-// .txt file location
-var txfilepath = './Public/test.txt'
-
-app.use(express.static(path.join(__dirname, 'public')))
-
-// Listen for requests
-var server = app.listen(app.get('port'), function() {
-  var port = server.address().port
-  console.log('Server is running on port ' + port)
-})
+app.set('view engine', 'ejs')
+app.set('views', path.join(__dirname, 'public'))
+// app.use(express.static(path.join(__dirname, 'public')))
 
 //Create user
-app.use(bodyParser.json()) // to support JSON-encoded bodies
-app.use(bodyParser.urlencoded({ extended: false }))
+app.get('/', function(req, res) {
+  res.render('index')
+})
 
 app.post('/', function(req, res) {
   var fname = req.body.firstName // Firstname
   var lname = req.body.lastName // lastname
 
   var fullname = fname + ',' + lname // Full Name
-  res.send(
-    '<a href= "/List">Go to Update Name</a> <br/> User  <b> ' +
-      fname +
-      ' ' +
-      lname +
-      ' </b> has been created' +
-      '<br> <a href= "/">Go back to Form</a>'
-  ) // return html with return URL
 
   // Write txt file
   var logger = fs.createWriteStream(txfilepath, {
@@ -45,10 +36,38 @@ app.post('/', function(req, res) {
 
   logger.write(fullname + '\n')
   console.log('Text File Updated!')
+  res.render('success', {
+    data: {
+      backToListText: 'Go to Update Name',
+      messageStart: 'User',
+      userName: fname + ' ' + lname,
+      messageEnd: 'has been created',
+      backToFormText: 'Go back to Form'
+    }
+  })
 })
+
 app.get('/List', function(req, res) {
   var input = fs.createReadStream(txfilepath)
-  var tbl = readLines(input, res)
+  //declare empty array that will be used to read users
+  var data = []
+
+  //readLines accepts 2 callback functions. First will be called each time after read from file and get array of users read from file.
+  readLines(
+    input,
+    function(userArr) {
+      //append new users to existing
+      data = data.concat(userArr)
+    },
+    //this callback is called when read from file is complete, so we can render the list
+    function() {
+      res.render('List', { data: data })
+    }
+  )
+
+  // console.log(data)
+  // data = [{ Firstname: 'Jess', lastname: 'Fake', lineNumber: 2 }]
+  // res.render('List', { data: data })
 })
 
 app.get('/Updateuser', function(req, res) {
@@ -60,24 +79,14 @@ app.get('/Updateuser', function(req, res) {
     lastName = line.split(',')[1]
   })
 
-  fs.readFile(path.join(__dirname, '/public/Update.html'), 'utf-8', function(
-    err,
-    content
-  ) {
-    if (err) {
-      res.end('error occurred')
-      return
-    }
-    var renderedHtml = ejs.render(content, {
-      firstName: firstName,
-      lastName: lastName,
-      ID: ID
-    }) //get rendered HTML code
-    res.end(renderedHtml)
-  })
+  res.render('Update', { ID: ID })
 })
 
 //Update user
+// app.get('updatesuccess', function(req, res){
+// res.render('updatesuccess', {firstname: req.query.first, lastname: req.query.last})
+// })
+
 app.post('/Updateuser', function(req, res) {
   var fname = req.body.firstName // Firstname
   var lname = req.body.lastName // lastname
@@ -90,19 +99,20 @@ app.post('/Updateuser', function(req, res) {
       return err
     }
     var input = data.split('\n')
-    //this to be explained
     input[LineNumber] = fullname
     input = input.join('\n')
     fs.writeFile(txfilepath, input, 'utf8', function(err) {
       if (err) return console.log(err)
-      res.send(
-        '<a href= "/List">Go back to list for more actions</a> <br/> User <b>' +
-          fname +
-          ' ' +
-          lname +
-          ' </b> has been updated' +
-          '<br> <a href= "/">Go back to Form</a>'
-      ) // return html with return URL
+
+      res.render('success', {
+        data: {
+          backToListText: 'Go back to list for more actions',
+          messageStart: 'User',
+          userName: fname + ' ' + lname,
+          messageEnd: 'has been updated',
+          backToFormText: 'Go back to Form'
+        }
+      })
     })
   })
 })
@@ -125,83 +135,58 @@ app.get('/RemoveUser', function(req, res) {
     input = input.join('\n')
     fs.writeFile(txfilepath, input, 'utf8', function(err) {
       if (err) return console.log(err)
-      res.send(
-        '<a href= "/List">Go back to List</a> <br/> User has been Deleted' +
-          '<br> <a href= "/">Go back to Form</a>'
-      ) // return html with return URL
+      res.render('success', {
+        data: {
+          backToListText: 'Go back to list for more actions',
+          messageStart: 'User has been Deleted',
+          userName: '',
+          messageEnd: '',
+          backToFormText: 'Go back to Form'
+        }
+      })
     })
   })
 })
 
-function readLines(input, func) {
+function readLines(input, dataFunc, endFunc) {
   var remaining = ''
   //'on' comes from file system
   //reads the data from the line
   input.on('data', function(data) {
     remaining += data
-    //is gonna find the last index of the new line
+    //its finding the last index of the new line
     var index = remaining.indexOf('\n')
 
-    //is an error of the line of the text file
-    var reocordarray = []
-    //is counter number dispalying the lines
+    // an error of the line of the text file
+    var recordarray = []
+    //counter number dispalying the lines
     var lineNumber = 1
     while (index > -1) {
       var line = remaining.substring(0, index)
       var FullnameArray = line.split(',')
       var FullnameJson = {
-        Firstname: FullnameArray[0],
-        lastname: FullnameArray[1],
+        firstName: FullnameArray[0],
+        lastName: FullnameArray[1],
         lineNumber: lineNumber
       }
-      reocordarray.push(FullnameJson)
+      recordarray.push(FullnameJson)
       remaining = remaining.substring(index + 1)
       // func(line);
       index = remaining.indexOf('\n')
       lineNumber++
     }
-    var tbl = createTable(reocordarray)
-    console.log(reocordarray)
-    func.send(tbl)
-    //return tbl;
+    //call update function with new records
+    dataFunc(recordarray)
   })
+
   // ends the action of sending html to the browser
   input.on('end', function() {
-    if (remaining.length > 0) {
-      func(remaining)
-    }
+    endFunc()
   })
 }
 
 function func(data) {
   return 'Line: ' + data
-}
-
-function createTable(data) {
-  var tbl =
-    '<a href="/"><button>Create User</button></a><br/><table><tbody><tr><th><u>Firstname</u></th><th><u>Lastname</u></th><th><u>Action</u></th><th><u>Update</u></th><th><u>Delete</u></th><tr>'
-  console.log(data[0].Firstname)
-
-  for (var i = 0; i < data.length; i++) {
-    var tr = '<tr>'
-    tr = tr + '<td>' + data[i].Firstname + '</td>'
-    tr = tr + '<td>' + data[i].lastname + '</td>'
-    tr = tr + '<td>' + data[i].lineNumber + '</td>'
-    tr =
-      tr +
-      '<td><a href="/Updateuser?id=' +
-      data[i].lineNumber +
-      '"><button>Update</button></a></td>'
-    tr =
-      tr +
-      '<td><a href="/RemoveUser?id=' +
-      data[i].lineNumber +
-      '"><button>Delete</button></a></td>'
-
-    tr = tr + '</tr>'
-    tbl = tbl + tr
-  }
-  return tbl
 }
 
 // Read Nth line of file(any number of line)
@@ -234,3 +219,7 @@ function get_line(filename, line_no, callback) {
     callback('File end reached without finding line', null)
   })
 }
+
+app.listen(3000, function() {
+  console.log('The server is running on port 3000')
+})
